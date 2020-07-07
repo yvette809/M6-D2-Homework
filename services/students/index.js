@@ -1,124 +1,97 @@
-const express = require ("express")
-const fs = require("fs")
-const path = require("path")
-const{join}= require("path")
-const uniqid = require("uniqid")
+const express = require("express")
+const StudentSchema = require("../schema")
+
 const studRouter = express.Router()
-// const {check, validationResult} = require("express validator")
-const { response } = require("express")
-const multer = require("multer")
 
-const usersFilePath = path.join(__dirname,"students.json")
-//1
-studRouter.get("/", (req,res)=>{
-const fileContent = fs.readFileSync(usersFilePath)
- const studentString = fileContent.toString()
- console.log(studentString)
- res.send(JSON.parse(studentString))
+// get all students
+
+studRouter.get("/", async (req,res,next)=>{
+    try{
+        const students = await StudentSchema.find(req.query)
+        res.send(students)
+    }catch(error){
+       next(error)
+    }
 })
 
-
-//2
-studRouter.get("/:id", (req,res) =>{
-    const fileContent = fs.readFileSync(usersFilePath)
-    const studentsArray = JSON.parse(fileContent.toString())
-    console.log(studentsArray)
-    //we filter out the array to get the specified user
-   const student= studentsArray.filter(student => student.id === req.params.id)
-   console.log(student)
-   res.send(student)
-
-
-})
-
-//3
-studRouter.post("/", (req,res)=>{
-    console.log(req.body)
-    const newStud = {...req.body, id:uniqid(), numberOfProjects :0}
-    const fileContent = fs.readFileSync(usersFilePath)
-    const studentsArray = JSON.parse(fileContent.toString())
-    studentsArray.push(newStud)
-    // now we write the new content in to the same file
-    fs.writeFileSync(usersFilePath, JSON.stringify(studentsArray))
-    res.status(201).send(newStud)
-})
-
-//4
-studRouter.put("/:id", (req,res)=>{
-    const fileContent = fs.readFileSync(usersFilePath)
-    const studentsArray= JSON.parse(fileContent.toString())
-    if(studentsArray.length > 0){
-        const filteredStudsArray = studentsArray.filter(student =>
-            student.id !== req.params.id)
-            const student = { id: req.params.id, ...req.body }
-            filteredStudsArray.push(student)
-            fs.writeFileSync(usersFilePath, JSON.stringify(filteredStudsArray))
+// get student with a specific id
+studRouter.get("/:id", async (req,res,next)=>{
+    try{
+        const id = req.params.id
+        const student = await StudentSchema.findById(id)
+        if(student){
             res.send(student)
-    }else{
-        res.status(404).send("weare sorry we do not have any student yet")
-    }
-    
-})
-
-
-//5
-studRouter.delete("/:id", (req,res)=>{
-    const fileContent = fs.readFileSync(usersFilePath)
-    const studentsArray = JSON.parse(fileContent.toString())
-    if(studentsArray.length > 0){
-        // filter students by excluding the one with specified id
-    const filteredStudsArray = studentsArray.filter(student =>{
-        student.id !== req.params.id
-        // write the filtered content back in to the same file
-    fs.writeFileSync(usersFilePath, JSON.stringify(filteredStudsArray))
-    res.send("that student was deleted")
-    })
-
-    } else{
-        res.status(404).send("student not deleted")
-    }
-    
-})
-// const validator = [check("name").exist().isLength({min:3}).withMessage("name is mandatory"), check("profession".exist().isLength({min:3}).withMessage("profession is mandatory"))]
-
-studRouter.post("/:checkEmail", (res,req)=>{
-    const errors = validationResult(req)
-    // if(!errors.isEmpty()){
-    //     return response.status(400).send(errors)
-    // }
-    const newStud = {...req.body, id:uniqid(), numberOfProjects :0}
-    const fileContent = fs.readFileSync(usersFilePath)
-    const studentsArray = JSON.parse(fileContent.toString())
-    const students = studentsArray.filter(student => student.id!==newStudent.id)
-    if(students.length > 0){
-        const filteredStudents = students.filter(student => student.email === newStudent.email)
-        if(filteredStudents.length > 0){
-            res.status(400).send(false)
         }else{
-            res.status(200).send(true)
+            const error = new Error()
+            error.httpStatusCode = 404
+            next(error)
         }
-    }else{
-        res.status(200).send(true)
+
+    }catch(error){
+        next(error)
     }
 })
-// upload files
-const upload = multer({})
-studRouter.post("/:id/upload", upload.single("avatar"), (req, res)=>{
-    const imagespath =join(__dirname,"../../../images")
-    //images/mysummer/2020/imagename.jpg
-    console.log(req.file)
-    const fileExt = path.extname(req.file.originalname)
-    fs.writeFileSync(join(imagespath,req.params.id + fileExt), req.file.buffer)
-    //1 save in to the student the path to it's own image
-    
-    //make the image folder public
-    res.send("ok")
+
+
+// create a new student
+studRouter.post("/", async(req,res,next)=>{
+    try{
+        const newStudent = new StudentSchema(req.body)
+        const{id} = await newStudent.save()
+        res.status(201).send(id)
+
+    }catch(error){
+        next(error)
+    }
 })
 
-//   router.get("/:id/projects", (req, res) => {
-//     const projects = readFile(path.join(__dirname, "../projects/projects.json"))
-  
-//     res.send(projects.filter((proj) => proj.studentID === req.params.id))
-//   })
+// update a single student
+studRouter.put("/:id", async(req,res,next)=>{
+    try{
+        const student = await StudentSchema.findByIdAndUpdate(req.params.id,req.body)
+        console.log(student)
+        if(student){
+            res.send("ok")
+        }else{
+            const error = new Error(`student with id ${req.params.id} not found`)
+            error.httpStatusCode = 404
+            next(error)
+        }
+
+    }catch(error){
+        next(error)
+    }
+})
+
+// delete student with a specific id
+
+studRouter.delete("/:id", async (req,res,next)=>{
+    try{
+        const student = await StudentSchema.findByIdAndDelete(req.params.id)
+        if(student){
+            res.send("deleted")
+        }else{
+            const error = new Error(`student with id  ${req.params.id} not found`)
+            error.httpStatusCode= 404
+            next(error)
+        }
+
+    }catch(error){
+        next(error)
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = studRouter
