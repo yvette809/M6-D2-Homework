@@ -1,16 +1,58 @@
 const {Schema} = require("mongoose")
 const mongoose = require("mongoose")
+const v = require("validator")
 
 const StudentSchema = new Schema(
     {
         
-        name: String,
-        surname:String,
-        email:String,
-        dateOfBirth:String,
-        country:String
+        name: {
+            type:String,
+            required: [true, "A student must have a name"],
+            unique:true
+        },
+        surname:{
+            type:String,
+            required:[true, "A student must have a surname"]
+
+        },
+        email:{
+            type:String,
+            required:true,
+            lowercase:true,
+            validate:{
+                validator:async(value) =>{
+                    if(!v.isEmail(value)){
+                        throw new Error ("Email is invalid")
+                    }else{
+                        const checkEmail = await studentModel.findOne({email:value})
+                        if (checkEmail){
+                            throw new Error("email already exist!")
+                        }
+                    }
+                }
+            }
+        },
+        dateOfBirth:{
+            type:String,
+            required:true
+        },
+        country:{
+            type:String,
+        required:true
+        }
+     
 
 })
+// studentSchema.post("validate", ()=>{
+//     if(error){
+//         error.httpStatusCode = 400
+//         next(error)
+//     }else{
+//         next()
+//     }
+// })
 
 
-module.exports = mongoose.model("Student", StudentSchema)
+
+const studentModel = mongoose.model("Student", StudentSchema)
+module.exports = studentModel

@@ -37,8 +37,8 @@ studRouter.get("/:id", async (req,res,next)=>{
 studRouter.post("/", async(req,res,next)=>{
     try{
         const newStudent = new StudentSchema(req.body)
-        const{id} = await newStudent.save()
-        res.status(201).send(id)
+        const{_id} = await newStudent.save()
+        res.status(201).send(_id)
 
     }catch(error){
         next(error)
@@ -51,7 +51,7 @@ studRouter.put("/:id", async(req,res,next)=>{
         const student = await StudentSchema.findByIdAndUpdate(req.params.id,req.body)
         console.log(student)
         if(student){
-            res.send("ok")
+            res.send(student)
         }else{
             const error = new Error(`student with id ${req.params.id} not found`)
             error.httpStatusCode = 404
