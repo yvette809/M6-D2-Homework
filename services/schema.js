@@ -24,6 +24,7 @@ const StudentSchema = new Schema(
                     if(!v.isEmail(value)){
                         throw new Error ("Email is invalid")
                     }else{
+                        //  read in the db if the email is in use
                         const checkEmail = await studentModel.findOne({email:value})
                         if (checkEmail){
                             throw new Error("email already exist!")
@@ -43,14 +44,14 @@ const StudentSchema = new Schema(
      
 
 })
-// studentSchema.post("validate", ()=>{
-//     if(error){
-//         error.httpStatusCode = 400
-//         next(error)
-//     }else{
-//         next()
-//     }
-// })
+StudentSchema.post("validate", (error,doc,next)=>{
+    if(error){
+        error.httpStatusCode = 400
+        next(error)
+    }else{
+        next()
+    }
+})
 
 
 

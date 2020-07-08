@@ -1,18 +1,46 @@
 const express = require("express")
 const StudentSchema = require("../schema")
+const q2m= require("query-to-mongo")
 
 const studRouter = express.Router()
 
 // get all students
-
+sol1:
 studRouter.get("/", async (req,res,next)=>{
+    const{sort,skip,limit} = req.query
+    delete req.query.skip
+    delete req.query.limit
+    delete req.query.sort
     try{
-        const students = await StudentSchema.find(req.query)
+        const students = await StudentSchema.find(req.query, {email:1})
+        .skip(parseInt(skip))
+        .limit(parseInt(limit))
+        .sort({[sort]: -1})
+        //const students = await StudentSchema.find(req.query, {email:1}).skip(4).limit(5).sort({email:1})
         res.send(students)
     }catch(error){
        next(error)
     }
 })
+
+//sol2:
+studRouter.get("/", async (req, res, next) => {
+    try {
+      const query = q2m(req.query)
+      const students = await studentSchema.find(query.criteria, query.options.fields)
+        .skip(query.options.skip)
+        .limit(query.options.limit)
+        .sort(query.options.sort)
+  
+      res.send({
+        data: students,
+        total: students.length,
+      })
+    } catch (error) {
+      next(error)
+    }
+  })
+
 
 // get student with a specific id
 studRouter.get("/:id", async (req,res,next)=>{
@@ -37,8 +65,8 @@ studRouter.get("/:id", async (req,res,next)=>{
 studRouter.post("/", async(req,res,next)=>{
     try{
         const newStudent = new StudentSchema(req.body)
-        const{_id} = await newStudent.save()
-        res.status(201).send(_id)
+        const response = await newStudent.save()
+        res.status(201).send(response)
 
     }catch(error){
         next(error)
