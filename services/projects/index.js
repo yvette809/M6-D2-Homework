@@ -45,7 +45,7 @@ projectRouter.get("/:id", async (req,res,next)=>{
 // create a new project
 projectRouter.post("/", async(req,res,next)=>{
     try{
-        const newProject = new projectModel(req.body)
+        const newProject = await new projectModel(req.body)
         const response = await newProject.save()
         res.status(201).send(response)
 

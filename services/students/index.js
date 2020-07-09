@@ -1,5 +1,6 @@
 const express = require("express")
 const StudentSchema = require("../schema")
+const projectModel = require("../projects/schema")
 const q2m= require("query-to-mongo")
 
 const studRouter = express.Router()
@@ -58,6 +59,20 @@ studRouter.get("/:id", async (req,res,next)=>{
     }catch(error){
         next(error)
     }
+})
+
+// get projects of a particular student
+studRouter.get("/:id/projects",  async (req,res,next)=>{
+  try{
+      
+    const project = await projectModel.find(req.query)
+    filteredP = project.find(p => p.studentID === req.params.id)
+    res.status(200).send(filteredP)
+
+  }catch(error){
+      next(error)
+  }
+
 })
 
 
