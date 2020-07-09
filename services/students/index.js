@@ -66,8 +66,18 @@ studRouter.get("/:id/projects",  async (req,res,next)=>{
   try{
       
     const project = await projectModel.find(req.query)
-    filteredP = project.find(p => p.studentID === req.params.id)
-    res.status(200).send(filteredP)
+    let numberOfProjects = 0
+    filteredP = project.filter(p => p.studentID === req.params.id)
+    if(filteredP){
+        numberOfProjects += 1
+        filteredP.push(numberOfProjects)
+        res.status(200).send(filteredP)
+    }else{
+        const error = new Error("could.t get project")
+        error.httpStatusCode = 404
+        next(error)
+    }
+    
 
   }catch(error){
       next(error)
@@ -79,7 +89,7 @@ studRouter.get("/:id/projects",  async (req,res,next)=>{
 // create a new student
 studRouter.post("/", async(req,res,next)=>{
     try{
-        const newStudent = new StudentSchema(req.body)
+        const newStudent = await new StudentSchema(req.body)
         const response = await newStudent.save()
         res.status(201).send(response)
 

@@ -1,5 +1,6 @@
 const express = require("express")
 const projectModel = require("./schema")
+const q2m = require("query-to-mongo")
 const projectRouter = express.Router()
 
 
@@ -20,6 +21,24 @@ projectRouter.get("/", async (req, res, next) => {
     } catch (error) {
       next(error)
     }
+  })
+
+
+  // filter project with name as search query
+  projectRouter.get("/", async(req,res,next)=>{
+      try{
+          const projects = await projectModel.find(req.query.name)
+          if(projects){
+              res.status(200).send(projects)
+          }else{
+              const error = new Error("noproject found with that name")
+              error.httpStatusCode= 404
+              next(error)
+          }
+
+      }catch(error){
+          next(error)
+      }
   })
 
 
@@ -89,7 +108,6 @@ projectRouter.delete("/:id", async (req,res,next)=>{
         next(error)
     }
 })
-
 
 
 
