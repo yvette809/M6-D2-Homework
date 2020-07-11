@@ -22,7 +22,8 @@ const projectSchema = new Schema({
     studentID:{
         type:String,
         required:true
-    }
+    },
+    image:String
 
 })
 

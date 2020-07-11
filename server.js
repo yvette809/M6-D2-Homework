@@ -13,7 +13,7 @@ server.use(express.json())
 
 server.use("/students",studRouter)
 server.use("/projects", projectRouter)
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3001
 
 mongoose.connect("mongodb://localhost:27017/students-profile",{
     useNewUrlParser:true,
