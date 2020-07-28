@@ -62,6 +62,7 @@ studRouter.get("/:id", async (req,res,next)=>{
 })
 
 // get projects of a particular student
+//sol 1
 studRouter.get("/:id/projects",  async (req,res,next)=>{
   try{
       
@@ -84,6 +85,26 @@ studRouter.get("/:id/projects",  async (req,res,next)=>{
   }
 
 })
+// sol 2
+
+
+// get students with their projects
+studRouter.get("/:id/projects", async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const project = await  projectModel.findOne({id:id})
+      if (project) {
+        res.send(project)
+      } else {
+        const error = new Error()
+        error.httpStatusCode = 404
+        next(error)
+      }
+    } catch (error) {
+      console.log(error)
+      next("While reading experience list a problem occurred!")
+    }
+  })
 
 
 // create a new student
