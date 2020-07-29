@@ -40,8 +40,15 @@ const StudentSchema = new Schema(
         country:{
             type:String,
         required:true
-        }
-     
+        },
+        projects:[{
+               
+            type:Schema.Types.ObjectId,
+            ref:'project'
+           }
+        ]
+       
+           
 
 })
 StudentSchema.post("validate", (error,doc,next)=>{

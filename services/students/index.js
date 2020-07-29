@@ -6,14 +6,14 @@ const q2m= require("query-to-mongo")
 const studRouter = express.Router()
 
 // get all students
-sol1:
+// sol1:
 studRouter.get("/", async (req,res,next)=>{
     const{sort,skip,limit} = req.query
     delete req.query.skip
     delete req.query.limit
     delete req.query.sort
     try{
-        const students = await StudentSchema.find(req.query)
+        const students = await StudentSchema.find(req.query).populate('projects')
         .skip(parseInt(skip))
         .limit(parseInt(limit))
         .sort({[sort]: -1})
@@ -25,22 +25,17 @@ studRouter.get("/", async (req,res,next)=>{
 })
 
 //sol2:
-studRouter.get("/", async (req, res, next) => {
-    try {
-      const query = q2m(req.query)
-      const students = await studentSchema.find(query.criteria, query.options.fields)
-        .skip(query.options.skip)
-        .limit(query.options.limit)
-        .sort(query.options.sort)
-  
-      res.send({
-        data: students,
-        total: students.length,
-      })
-    } catch (error) {
-      next(error)
-    }
-  })
+// studRouter.get("/", async (req, res, next) => {
+//     try {
+    
+//       const students = await StudentSchema.find(req.query).populate('project', 'name')
+        
+//     res.status(200).send(students)
+        
+//     } catch (error) {
+//       next(error)
+//     }
+//   })
 
 
 // get student with a specific id
@@ -61,14 +56,14 @@ studRouter.get("/:id", async (req,res,next)=>{
     }
 })
 
-// get projects of a particular student
+//get projects of a particular student
 //sol 1
-studRouter.get("/:id/projects",  async (req,res,next)=>{
+studRouter.get("/:_id/projects",  async (req,res,next)=>{
   try{
       
     const project = await projectModel.find(req.query)
     let numberOfProjects = 0
-    filteredP = project.filter(p => p.studentID === req.params.id)
+    filteredP = project.filter(p => p.studentID === req.params._id)
     if(filteredP){
         numberOfProjects += 1
         filteredP.push(numberOfProjects)
@@ -85,14 +80,14 @@ studRouter.get("/:id/projects",  async (req,res,next)=>{
   }
 
 })
+
 // sol 2
 
-
-// get students with their projects
-studRouter.get("/:id/projects", async (req, res, next) => {
+// get projects for different students
+studRouter.get("/:_id/projects", async (req, res, next) => {
     try {
-      const id = req.params.id
-      const project = await  projectModel.findOne({id:id})
+      const id = req.params._id
+      const project = await  projectModel.findById(id)
       if (project) {
         res.send(project)
       } else {
@@ -106,6 +101,25 @@ studRouter.get("/:id/projects", async (req, res, next) => {
     }
   })
 
+  // get a specific project for a specific student
+  studRouter.get("/:_id/projects/:projId", async (req, res, next) => {
+    try {
+      const findUserProj = await projectModel.findById(
+        {
+          id: req.params._id,
+          projId: req.params.projId,
+        },
+        
+      );
+      if (findUserProj) {
+          res.status(200).send(findUserProj)
+      }else{
+       res.status(404).send("Not found")
+      };
+    } catch (error) {
+      next(error);
+    }
+  });
 
 // create a new student
 studRouter.post("/", async(req,res,next)=>{
