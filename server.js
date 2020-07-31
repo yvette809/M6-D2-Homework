@@ -1,6 +1,7 @@
 const express = require("express")
 const studRouter = require('./services/students')
 const projectRouter = require("./services/projects")
+const reviewsRouter = require("./services/reviews")
 const mongoose = require ("mongoose")
 const cors = require("cors")
 
@@ -13,6 +14,7 @@ server.use(express.json())
 
 server.use("/students",studRouter)
 server.use("/projects", projectRouter)
+server.use("/reviews", reviewsRouter)
 const port = process.env.PORT || 3040
 
 mongoose.connect("mongodb://localhost:27017/students-profile",{

@@ -3,14 +3,19 @@ const{Schema} = require("mongoose")
 
 
 const ReviewsSchema = new Schema({
-    name:{
+    comment:{
         type:String,
-        required:[true, 'A review must have a name']
+        required:[true, 'A review must have a comment']
     },
     rating:{
         type:Number,
+        required:[true, 'A review must have a rating']
         
     },
+    projectID:{
+        type:String,
+        required:true
+    }
 })
 
 
