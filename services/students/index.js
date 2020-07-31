@@ -125,8 +125,8 @@ studRouter.get("/:_id/projects", async (req, res, next) => {
 studRouter.post("/", async(req,res,next)=>{
     try{
         const newStudent = await new StudentSchema(req.body)
-        const response = await newStudent.save()
-        res.status(201).send(response)
+        const {_id} = await newStudent.save()
+        res.status(201).send(_id)
 
     }catch(error){
         next(error)
