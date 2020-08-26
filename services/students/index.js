@@ -13,7 +13,7 @@ studRouter.get("/", async (req,res,next)=>{
     delete req.query.limit
     delete req.query.sort
     try{
-        const students = await StudentSchema.find(req.query).populate('projects')
+        const students = await StudentSchema.find(req.query)
         .skip(parseInt(skip))
         .limit(parseInt(limit))
         .sort({[sort]: -1})

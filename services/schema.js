@@ -41,12 +41,12 @@ const StudentSchema = new Schema(
             type:String,
         required:true
         },
-        projects:[{
+        // projects:[{
                
-            type:Schema.Types.ObjectId,
-            ref:'project',
+        //     type:Schema.Types.ObjectId,
+        //     ref:'projects',
         
-           }]
+        //    }]
            
 
        

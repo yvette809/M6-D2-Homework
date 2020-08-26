@@ -67,7 +67,7 @@ reviewsRouter.put("/:id", async(req,res,next)=>{
      try{
          const review = await ReviewsModel.findByIdAndDelete(req.params.id)
          if(review){
-             res.status(200).send(review)
+             res.status(200).send('deleted')
          }else{
              const error = new Error()
              error.httpStatusCode = 404
